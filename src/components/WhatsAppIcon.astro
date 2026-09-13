@@ -1,0 +1,9 @@
+---
+type Props = {
+  size?: number;
+};
+
+const { size = 16 } = Astro.props;
+---
+
+<img class="whatsapp-icon" src="/icons/whatsapp.svg" width={size} height={size} alt="" aria-hidden="true" />

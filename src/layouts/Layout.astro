@@ -1,0 +1,28 @@
+---
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+  description?: string;
+};
+
+const {
+  title = "বিসমিল্লাহ হার্ডওয়্যার ও পেইন্ট | BHS",
+  description = "BHS একটি বিশ্বস্ত হার্ডওয়্যার ও পেইন্ট শপ, যেখানে পণ্য, পরামর্শ এবং সরাসরি যোগাযোগের সুবিধা রয়েছে।",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

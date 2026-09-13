@@ -1,0 +1,65 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ProductCard from "../components/ProductCard.astro";
+import WhatsAppIcon from "../components/WhatsAppIcon.astro";
+import { categories, shopDetails, visibleProducts } from "../data/products";
+
+const message = encodeURIComponent("আসসালামু আলাইকুম, একটি পণ্য সম্পর্কে জানতে চাই।");
+const whatsappHref = `https://wa.me/${shopDetails.whatsappNumber}?text=${message}`;
+---
+
+<Layout title="পণ্যসমূহ | বিসমিল্লাহ হার্ডওয়্যার ও পেইন্ট" description="BHS-এর হার্ডওয়্যার ও পেইন্ট পণ্যসমূহ দেখুন এবং WhatsApp-এ availability সম্পর্কে জিজ্ঞাসা করুন।">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="বিসমিল্লাহ হার্ডওয়্যার ও পেইন্ট হোম"><span class="brand-mark">BHS</span><span class="brand-copy"><strong>বিসমিল্লাহ</strong><span>হার্ডওয়্যার ও পেইন্ট</span></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <nav id="site-nav" class="site-nav" aria-label="প্রধান নেভিগেশন"><a class="active-nav" href="/products">পণ্যসমূহ</a><a href="/#partners">Authorized Dealer</a><a href="/#about">আমাদের কথা</a><a href={whatsappHref} target="_blank" rel="noreferrer" aria-label="WhatsApp-এ যোগাযোগ করুন" title="WhatsApp-এ যোগাযোগ করুন"><WhatsAppIcon size={19} /></a></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="products-hero"><div class="container products-hero-inner"><div><p class="kicker">BHS product catalog</p><h1>যে পণ্য দরকার,<br /><em>খুঁজে নিন।</em></h1></div><p>এখানে পণ্যের দাম দেখানো হয় না। পণ্যটি available কি না এবং quotation জানতে product card থেকে <WhatsAppIcon /> বার্তা পাঠান।</p></div></section>
+    <section class="products-browser" aria-labelledby="products-title"><div class="container"><div class="browser-toolbar"><div><p class="kicker">Browse collection</p><h2 id="products-title">সব পণ্য</h2></div><label class="search-box"><span aria-hidden="true">⌕</span><input id="product-search" type="search" placeholder="পণ্যের নাম দিয়ে খুঁজুন" autocomplete="off" /><span class="search-label">Search</span></label></div><div class="filter-row product-filters" role="group" aria-label="পণ্য category filter"><button class="filter-button active" type="button" data-filter="all">সব</button>{categories.map((category) => <button class="filter-button" type="button" data-filter={category.id}>{category.labelBn}</button>)}</div><p class="result-count" id="result-count" aria-live="polite">{visibleProducts.length}টি পণ্য</p><div class="product-grid" id="product-grid">{visibleProducts.map((product) => <ProductCard product={product} />)}</div><p class="empty-results" id="empty-results" hidden>এই category বা search-এ কোনো পণ্য পাওয়া যায়নি। <WhatsAppIcon /> বার্তা পাঠাতে পারেন।</p></div></section>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-inner"><div><span class="footer-brand">BHS</span><p>বিসমিল্লাহ হার্ডওয়্যার ও পেইন্ট</p></div><div><p>{shopDetails.whatsappDisplay}</p><p class="footer-muted">{shopDetails.address}</p></div><a href="/" class="back-top" aria-label="হোমে ফিরে যান">⌂</a></div></footer>
+</Layout>
+
+<script>
+  const menuToggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
+  const navigation = document.querySelector<HTMLElement>(".site-nav");
+  menuToggle?.addEventListener("click", () => { const isOpen = navigation?.classList.toggle("open") ?? false; menuToggle.setAttribute("aria-expanded", String(isOpen)); });
+  navigation?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => { navigation.classList.remove("open"); menuToggle?.setAttribute("aria-expanded", "false"); }));
+
+  const search = document.querySelector<HTMLInputElement>("#product-search");
+  const filterButtons = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
+  const productCards = document.querySelectorAll<HTMLElement>(".product-card");
+  const resultCount = document.querySelector<HTMLElement>("#result-count");
+  const emptyResults = document.querySelector<HTMLElement>("#empty-results");
+  const params = new URLSearchParams(window.location.search);
+  let activeFilter = params.get("category") ?? "all";
+
+  const updateResults = () => {
+    const query = search?.value.trim().toLowerCase() ?? "";
+    let visibleCount = 0;
+    productCards.forEach((card) => {
+      const category = card.dataset.category ?? "";
+      const content = card.textContent?.toLowerCase() ?? "";
+      const matches = (activeFilter === "all" || category === activeFilter) && (!query || content.includes(query));
+      card.hidden = !matches;
+      if (matches) visibleCount += 1;
+    });
+    if (resultCount) resultCount.textContent = `${visibleCount}টি পণ্য`;
+    if (emptyResults) emptyResults.hidden = visibleCount > 0;
+  };
+
+  filterButtons.forEach((button) => button.addEventListener("click", () => {
+    filterButtons.forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    activeFilter = button.dataset.filter ?? "all";
+    updateResults();
+  }));
+  search?.addEventListener("input", updateResults);
+  filterButtons.forEach((button) => button.classList.toggle("active", button.dataset.filter === activeFilter));
+  updateResults();
+</script>
